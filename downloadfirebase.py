@@ -7,10 +7,17 @@ import glob
 import os
 import requests
 import calendar
+import shutil
+import sys
 import time
 from io import BytesIO
 
 vaultDir = '/Users/nic/Desktop/test2021'
+vaultDir = sys.argv[1]
+print(f'vaultDir = [{vaultDir}]')
+# NOTE: need to ignore .git directory!
+# Maybe just look for *.md files
+# sys.exit()
 
 firebaseShort = 'none'
 fullRead = 'none'
@@ -37,6 +44,7 @@ for subdir, dirs, files in os.walk(vaultDir):
                     firebaseShort = 'https://firebasestorage' + link.group(1) # https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2FDownloadMyBrain%2FLy4Wel-rjk.png
                     firebaseUrl = link.group(0)[:-1] # https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2FDownloadMyBrain%2FLy4Wel-rjk.png?alt=media&token=0fbafc8f-0a47-4720-9e68-88f70803ced6
                     # Download the file locally
+                    print(f'requests.get({firebaseUrl})')
                     r = requests.get(firebaseUrl)
                     timestamp = calendar.timegm(time.gmtime())
                     # Get file extension of file. Ex: .png; .jpeg
@@ -48,6 +56,7 @@ for subdir, dirs, files in os.walk(vaultDir):
                     # Create new local file out of downloaded firebase file
                     newFilePath = 'assets/' + str(timestamp) + '_' + str(i) + ext
                     # print(firebaseUrl + '>>>' + newFilePath)
+                    print(f'writing [{newFilePath}]')
                     with open(vaultDir + '/' + newFilePath,'wb') as output_file:
                         shutil.copyfileobj(BytesIO(r.content), output_file)
                 except AttributeError: # This is to prevent the AttributeError exception when no matches are returned
@@ -61,11 +70,12 @@ for subdir, dirs, files in os.walk(vaultDir):
                     fullRead = open(fileFullPath, errors='ignore')
                 data = fullRead.read()
                 data = data.replace(firebaseUrl,newFilePath)
+                print(f'writing to [{fullTempFilePath}]')
                 with open(fullTempFilePath,'wt') as temp_file:
                     temp_file.write(data)
                     i = i + 1
                 if os.path.exists(fullTempFilePath):
+                    print(f'replacing [{fullTempFilePath}] with [{fileFullPath}]')
                     path = os.replace(fullTempFilePath,fileFullPath)
                 fullRead.close()
-        # Close file
         fhand.close()
