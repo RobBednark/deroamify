@@ -27,9 +27,8 @@ fullTempFilePath = ''
 
 IMAGES_DIR_RELATIVE = 'images'  # for images and pdfs
 IMAGES_DIR_FULL = f'{vaultDir}/{IMAGES_DIR_RELATIVE}'  # images, pdfs, etc
-i = 0
 file_number = 0
-image_file_number = 0
+image_file_number = 1
 ext = ''
 if not os.path.exists(IMAGES_DIR_FULL):
     os.makedirs(IMAGES_DIR_FULL)
@@ -64,7 +63,7 @@ for dirpath, dirnames, filenames in os.walk(vaultDir):
                     reg = re.search(r'(.*)\.(.+)', firebaseShort[-5:]) # a.png / .jpeg
                     ext = '.' + reg.group(2) # .jpeg
                     # Create new local file out of downloaded firebase file
-                    newFilePath = f'{IMAGES_DIR_RELATIVE}/{timestamp}_{i}{ext}'
+                    newFilePath = f'{IMAGES_DIR_RELATIVE}/{timestamp}_{image_file_number}{ext}'
                     # print(firebaseUrl + '>>>' + newFilePath)
                     print(f'writing [{newFilePath}]')
                     with open(vaultDir + '/' + newFilePath,'wb') as output_file:
@@ -84,7 +83,7 @@ for dirpath, dirnames, filenames in os.walk(vaultDir):
                 print(f'writing to [{fullTempFilePath}]')
                 with open(fullTempFilePath,'wt') as temp_file:
                     temp_file.write(data)
-                    i = i + 1
+                    image_file_number += 1
                 if os.path.exists(fullTempFilePath):
                     print(f'rename file from:\n [{fullTempFilePath}] to:\n [{fileFullPath}]')
                     os.replace(src=fullTempFilePath, dst=fileFullPath)
