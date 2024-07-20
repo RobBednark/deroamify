@@ -62,7 +62,6 @@ for dirpath, dirnames, filenames in os.walk(vaultDir):
                     ext = '.' + reg.group(2) # .jpeg
                     # Create images folder if it doesn't exist
                     # Create new local file out of downloaded firebase file
-                    newFilePath = 'assets/' + str(timestamp) + '_' + str(i) + ext
                     newFilePath = f'{IMAGES_DIR_RELATIVE}/{timestamp}_{i}{ext}'
                     # print(firebaseUrl + '>>>' + newFilePath)
                     print(f'writing [{newFilePath}]')
