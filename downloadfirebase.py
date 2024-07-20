@@ -5,7 +5,6 @@
 # This automatically puts filenames in /assets - change the newFilePath variable if you want to change this
 
 import re
-import glob
 import os
 import requests
 import calendar
