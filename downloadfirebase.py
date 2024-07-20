@@ -42,15 +42,17 @@ for dirpath, dirnames, filenames in os.walk(vaultDir):
         filehandle = open(fileFullPath, errors='strict')
         for line in filehandle:
             # Download the Firebase file and save it in the images directory
-            if 'firebasestorage' in line:
+            if 'https://firebasestorage' in line:
                 try:
                     # If it's a PDF, it will be in the format {{pdf: link}}
                     if '{{pdf:' in line:
                         link = re.search(r'https://firebasestorage(.*)\?alt(.*)\}', line)
                     else:
                         link = re.search(r'https://firebasestorage(.*)\?alt(.*)\)', line)
-                    firebaseShort = 'https://firebasestorage' + link.group(1) # https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2FDownloadMyBrain%2FLy4Wel-rjk.png
-                    firebaseUrl = link.group(0)[:-1] # https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2FDownloadMyBrain%2FLy4Wel-rjk.png?alt=media&token=0fbafc8f-0a47-4720-9e68-88f70803ced6
+                    # https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2FDownloadMyBrain%2FLy4Wel-rjk.png
+                    firebaseShort = 'https://firebasestorage' + link.group(1)
+                    # https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2FDownloadMyBrain%2FLy4Wel-rjk.png?alt=media&token=0fbafc8f-0a47-4720-9e68-88f70803ced6
+                    firebaseUrl = link.group(0)[:-1]
 
                     # Download the file
                     print(f'requests.get({firebaseUrl})')
@@ -60,8 +62,8 @@ for dirpath, dirnames, filenames in os.walk(vaultDir):
                     # e.g., timestamp == 1721501543
                     timestamp = calendar.timegm(time.gmtime())
                     # Get file extension of file. Ex: .png; .jpeg
-                    reg = re.search(r'(.*)\.(.+)', firebaseShort[-5:]) # a.png / .jpeg
-                    ext = '.' + reg.group(2) # .jpeg
+                    match = re.search(r'(.*)\.(.+)', firebaseShort[-5:]) # a.png / .jpeg
+                    ext = '.' + match.group(2) # .jpeg
                     # Create new local file out of downloaded firebase file
                     newFilePath = f'{IMAGES_DIR_RELATIVE}/{timestamp}_{image_file_number}{ext}'
                     # print(firebaseUrl + '>>>' + newFilePath)
