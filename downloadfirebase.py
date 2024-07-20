@@ -40,7 +40,7 @@ for dirpath, dirnames, filenames in os.walk(vaultDir):
         file_number += 1
         fileFullPath = os.path.join(dirpath,filename)
         print(f'file [{file_number}]: [{fileFullPath}]')
-        filehandle = open(fileFullPath, errors='ignore')
+        filehandle = open(fileFullPath, errors='strict')
         for line in filehandle:
             # Download the Firebase file and save it in the images directory
             if 'firebasestorage' in line:
@@ -76,9 +76,9 @@ for dirpath, dirnames, filenames in os.walk(vaultDir):
                 # If there is already a temp version of a file, open that.
                 fullTempFilePath = vaultDir + '/temp_' + filename
                 if os.path.exists(fullTempFilePath):
-                    fullRead = open(fullTempFilePath, errors='ignore')
+                    fullRead = open(fullTempFilePath, errors='strict')
                 else:
-                    fullRead = open(fileFullPath, errors='ignore')
+                    fullRead = open(fileFullPath, errors='strict')
                 data = fullRead.read()
                 data = data.replace(firebaseUrl, newFilePath)
                 print(f'writing to [{fullTempFilePath}]')
