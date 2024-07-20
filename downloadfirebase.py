@@ -1,8 +1,10 @@
 #!/usr/bin/env python
 
+# ./downloadfirebase.py [directory]
+# e.g.,
+#   python downloadfirebase.py .
 # Opens files in directory, outputs firebase URLs to a file, downloads them, and replaces the links with a link to the new files.
-# To use, replace PATH in the variable vaultDir with your vault's root directory.
-# This automatically puts filenames in /assets - change the newFilePath variable if you want to change this
+# Files are This automatically puts filenames in /assets - change the newFilePath variable if you want to change this
 
 import re
 import os
@@ -13,9 +15,9 @@ import sys
 import time
 from io import BytesIO
 
-vaultDir = '/Users/nic/Desktop/test2021'
-vaultDir = sys.argv[1]
-print(f'vaultDir = [{vaultDir}]')
+inputDir = '/Users/nic/Desktop/test2021'
+inputDir = sys.argv[1]
+print(f'inputDir = [{inputDir}]')
 # NOTE: need to ignore .git directory!
 # Maybe just look for *.md files
 # sys.exit()
@@ -26,7 +28,7 @@ fileFullPath = ''
 fullTempFilePath = ''
 
 IMAGES_DIR_RELATIVE = 'images'  # for images and pdfs
-IMAGES_DIR_FULL = f'{vaultDir}/{IMAGES_DIR_RELATIVE}'  # images, pdfs, etc
+IMAGES_DIR_FULL = f'{inputDir}/{IMAGES_DIR_RELATIVE}'  # images, pdfs, etc
 file_number = 0
 image_file_number = 1
 ext = ''
@@ -34,7 +36,7 @@ if not os.path.exists(IMAGES_DIR_FULL):
     os.makedirs(IMAGES_DIR_FULL)
 
 # Walk through all files in all directories within the specified vault directory
-for dirpath, dirnames, filenames in os.walk(vaultDir):
+for dirpath, dirnames, filenames in os.walk(inputDir):
     for filename in filenames:
         file_number += 1
         fileFullPath = os.path.join(dirpath,filename)
@@ -68,14 +70,14 @@ for dirpath, dirnames, filenames in os.walk(vaultDir):
                     newFilePath = f'{IMAGES_DIR_RELATIVE}/{timestamp}_{image_file_number}{ext}'
                     # print(firebaseUrl + '>>>' + newFilePath)
                     print(f'writing [{newFilePath}]')
-                    with open(vaultDir + '/' + newFilePath,'wb') as output_file:
+                    with open(inputDir + '/' + newFilePath,'wb') as output_file:
                         shutil.copyfileobj(BytesIO(request.content), output_file)
                 except AttributeError: # This is to prevent the AttributeError exception when no matches are returned
                     print(f'ERROR:  AttributeError: line=[{line}] fileFullPath=[{fileFullPath}]')
                     continue
                 # Save Markdown file with new local file link as a temp file
                 # If there is already a temp version of a file, open that.
-                fullTempFilePath = vaultDir + '/temp_' + filename
+                fullTempFilePath = inputDir + '/temp_' + filename
                 if os.path.exists(fullTempFilePath):
                     fullRead = open(fullTempFilePath, errors='strict')
                 else:
