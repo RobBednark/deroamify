@@ -66,7 +66,7 @@ for subdir, dirs, files in os.walk(vaultDir):
                     with open(vaultDir + '/' + newFilePath,'wb') as output_file:
                         shutil.copyfileobj(BytesIO(request.content), output_file)
                 except AttributeError: # This is to prevent the AttributeError exception when no matches are returned
-                    print(f'AttributeError: line=[{line}] fileFullPath=[{fileFullPath}]')
+                    print(f'ERROR:  AttributeError: line=[{line}] fileFullPath=[{fileFullPath}]')
                     continue
                 # Save Markdown file with new local file link as a temp file
                 # If there is already a temp version of a file, open that.
