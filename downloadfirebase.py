@@ -13,6 +13,7 @@ import calendar
 import shutil
 import sys
 import time
+import traceback
 from io import BytesIO
 
 inputDir = '/Users/nic/Desktop/test2021'
