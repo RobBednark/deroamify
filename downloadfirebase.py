@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 # Opens files in directory, outputs firebase URLs to a file, downloads them, and replaces the links with a link to the new files.
 # To use, replace PATH in the variable vaultDir with your vault's root directory.
 # This automatically puts filenames in /assets - change the newFilePath variable if you want to change this
