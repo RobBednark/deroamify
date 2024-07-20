@@ -52,15 +52,17 @@ for dirpath, dirnames, filenames in os.walk(vaultDir):
                         link = re.search(r'https://firebasestorage(.*)\?alt(.*)\)', line)
                     firebaseShort = 'https://firebasestorage' + link.group(1) # https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2FDownloadMyBrain%2FLy4Wel-rjk.png
                     firebaseUrl = link.group(0)[:-1] # https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2FDownloadMyBrain%2FLy4Wel-rjk.png?alt=media&token=0fbafc8f-0a47-4720-9e68-88f70803ced6
+
                     # Download the file
                     print(f'requests.get({firebaseUrl})')
                     request = requests.get(firebaseUrl)
+
+                    # Write the file to disk
                     # e.g., timestamp == 1721501543
                     timestamp = calendar.timegm(time.gmtime())
                     # Get file extension of file. Ex: .png; .jpeg
                     reg = re.search(r'(.*)\.(.+)', firebaseShort[-5:]) # a.png / .jpeg
                     ext = '.' + reg.group(2) # .jpeg
-                    # Create images folder if it doesn't exist
                     # Create new local file out of downloaded firebase file
                     newFilePath = f'{IMAGES_DIR_RELATIVE}/{timestamp}_{i}{ext}'
                     # print(firebaseUrl + '>>>' + newFilePath)
@@ -78,7 +80,7 @@ for dirpath, dirnames, filenames in os.walk(vaultDir):
                 else:
                     fullRead = open(fileFullPath, errors='ignore')
                 data = fullRead.read()
-                data = data.replace(firebaseUrl,newFilePath)
+                data = data.replace(firebaseUrl, newFilePath)
                 print(f'writing to [{fullTempFilePath}]')
                 with open(fullTempFilePath,'wt') as temp_file:
                     temp_file.write(data)
