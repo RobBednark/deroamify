@@ -86,7 +86,7 @@ for dirpath, dirnames, filenames in os.walk(vaultDir):
                     temp_file.write(data)
                     i = i + 1
                 if os.path.exists(fullTempFilePath):
-                    print(f'replacing [{fullTempFilePath}] with [{fileFullPath}]')
-                    path = os.replace(fullTempFilePath,fileFullPath)
+                    print(f'rename file from:\n [{fullTempFilePath}] to:\n [{fileFullPath}]')
+                    os.replace(src=fullTempFilePath, dst=fileFullPath)
                 fullRead.close()
         filehandle.close()
