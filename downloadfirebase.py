@@ -76,7 +76,7 @@ for dirpath, dirnames, filenames in os.walk(inputDir):
                     print(f'ERROR:  AttributeError: line=[{line}] fileFullPath=[{fileFullPath}]')
                     # Print all the details of the exception
                     print(traceback.format_exc())
-                    continue
+                    sys.exit(1)
                 # Save Markdown file with new local file link as a temp file
                 # If there is already a temp version of a file, open that.
                 fullTempFilePath = inputDir + '/temp_' + filename
