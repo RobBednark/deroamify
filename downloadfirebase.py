@@ -28,15 +28,18 @@ fullTempFilePath = ''
 IMAGES_DIR_RELATIVE = 'images'  # for images and pdfs
 IMAGES_DIR_FULL = f'{vaultDir}/{IMAGES_DIR_RELATIVE}'  # images, pdfs, etc
 i = 0
+file_number = 0
+image_file_number = 0
 ext = ''
 if not os.path.exists(IMAGES_DIR_FULL):
     os.makedirs(IMAGES_DIR_FULL)
 
 # Walk through all files in all directories within the specified vault directory
-for subdir, dirs, files in os.walk(vaultDir):
-    for file in files:
-        # Open file in directory
-        fileFullPath = os.path.join(subdir,file)
+for dirpath, dirnames, filenames in os.walk(vaultDir):
+    for filename in filenames:
+        file_number += 1
+        fileFullPath = os.path.join(dirpath,filename)
+        print(f'file [{file_number}]: [{fileFullPath}]')
         filehandle = open(fileFullPath, errors='ignore')
         for line in filehandle:
             # Download the Firebase file and save it in the images directory
@@ -70,7 +73,7 @@ for subdir, dirs, files in os.walk(vaultDir):
                     continue
                 # Save Markdown file with new local file link as a temp file
                 # If there is already a temp version of a file, open that.
-                fullTempFilePath = vaultDir + '/temp_' + file
+                fullTempFilePath = vaultDir + '/temp_' + filename
                 if os.path.exists(fullTempFilePath):
                     fullRead = open(fullTempFilePath, errors='ignore')
                 else:
