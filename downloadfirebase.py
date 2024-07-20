@@ -24,17 +24,22 @@ firebaseShort = 'none'
 fullRead = 'none'
 fileFullPath = ''
 fullTempFilePath = ''
+
+IMAGES_DIR_RELATIVE = 'images'  # for images and pdfs
+IMAGES_DIR_FULL = f'{vaultDir}/{IMAGES_DIR_RELATIVE}'  # images, pdfs, etc
 i = 0
 ext = ''
+if not os.path.exists(IMAGES_DIR_FULL):
+    os.makedirs(IMAGES_DIR_FULL)
 
 # Walk through all files in all directories within the specified vault directory
 for subdir, dirs, files in os.walk(vaultDir):
     for file in files:
         # Open file in directory
         fileFullPath = os.path.join(subdir,file)
-        fhand = open(fileFullPath, errors='ignore')
-        for line in fhand:
-            # Download the Firebase file and save it in the assets folder
+        filehandle = open(fileFullPath, errors='ignore')
+        for line in filehandle:
+            # Download the Firebase file and save it in the images directory
             if 'firebasestorage' in line:
                 try:
                     # If it's a PDF, it will be in the format {{pdf: link}}
@@ -44,23 +49,24 @@ for subdir, dirs, files in os.walk(vaultDir):
                         link = re.search(r'https://firebasestorage(.*)\?alt(.*)\)', line)
                     firebaseShort = 'https://firebasestorage' + link.group(1) # https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2FDownloadMyBrain%2FLy4Wel-rjk.png
                     firebaseUrl = link.group(0)[:-1] # https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2FDownloadMyBrain%2FLy4Wel-rjk.png?alt=media&token=0fbafc8f-0a47-4720-9e68-88f70803ced6
-                    # Download the file locally
+                    # Download the file
                     print(f'requests.get({firebaseUrl})')
-                    r = requests.get(firebaseUrl)
+                    request = requests.get(firebaseUrl)
+                    # e.g., timestamp == 1721501543
                     timestamp = calendar.timegm(time.gmtime())
                     # Get file extension of file. Ex: .png; .jpeg
                     reg = re.search(r'(.*)\.(.+)', firebaseShort[-5:]) # a.png / .jpeg
                     ext = '.' + reg.group(2) # .jpeg
-                    # Create assets folder if it doesn't exist
-                    if not os.path.exists(vaultDir + '/assets'):
-                        os.makedirs(vaultDir + '/assets')
+                    # Create images folder if it doesn't exist
                     # Create new local file out of downloaded firebase file
                     newFilePath = 'assets/' + str(timestamp) + '_' + str(i) + ext
+                    newFilePath = f'{IMAGES_DIR_RELATIVE}/{timestamp}_{i}{ext}'
                     # print(firebaseUrl + '>>>' + newFilePath)
                     print(f'writing [{newFilePath}]')
                     with open(vaultDir + '/' + newFilePath,'wb') as output_file:
-                        shutil.copyfileobj(BytesIO(r.content), output_file)
+                        shutil.copyfileobj(BytesIO(request.content), output_file)
                 except AttributeError: # This is to prevent the AttributeError exception when no matches are returned
+                    print(f'AttributeError: line=[{line}] fileFullPath=[{fileFullPath}]')
                     continue
                 # Save Markdown file with new local file link as a temp file
                 # If there is already a temp version of a file, open that.
@@ -79,4 +85,4 @@ for subdir, dirs, files in os.walk(vaultDir):
                     print(f'replacing [{fullTempFilePath}] with [{fileFullPath}]')
                     path = os.replace(fullTempFilePath,fileFullPath)
                 fullRead.close()
-        fhand.close()
+        filehandle.close()
