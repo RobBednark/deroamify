@@ -48,8 +48,9 @@ for dirpath, dirnames, filenames in os.walk(inputDir):
         file_number_markdown += 1
         fileFullPath = os.path.join(dirpath,filename)
         print(f'markdown file [{file_number_markdown}]: [{fileFullPath}]')
-        filehandle = open(fileFullPath, errors='strict')
-        for line in filehandle:
+        fh_input = open(fileFullPath, mode='r+', errors='strict')
+        firebase_urls_found = []
+        for line in fh_input:
             # Download the Firebase file and save it in the images directory
             #if 'https://firebasestorage' in line:
             if 'firebasestorage' in line:
@@ -85,39 +86,27 @@ for dirpath, dirnames, filenames in os.walk(inputDir):
 
                 newFilePath = f'{IMAGES_DIR_RELATIVE}/{md5_filename}'  # e.g., images/0cc175b9c0f1b6a831c399e269772661.pdf
                 output_path = f'{inputDir}/{newFilePath}'
+                firebase2local[firebaseUrl] = newFilePath
+                firebase_urls_found.append(firebaseUrl)
                 if os.path.exists(output_path):
                     print(f'NOTE: already downloaded: [{firebaseUrl}]  [{output_path}]')
                 else:
                     url2filename[firebaseUrl] = md5_filename
-                    firebase2local[firebaseUrl] = newFilePath
                     # Download the file
                     print(f'requests.get({firebaseUrl})')
                     request = requests.get(firebaseUrl)
                     print(f'writing [{output_path}]')
                     with open(output_path, 'wb') as fh_output:
                         shutil.copyfileobj(BytesIO(request.content), fh_output)
-
-
-
-
-                # Save Markdown file with new local file link as a temp file
-                # If there is already a temp version of a file, open that.
-                fullTempFilePath = inputDir + '/temp_' + filename
-                if os.path.exists(fullTempFilePath):
-                    print(f'NOTE: temp file already exists: [{fullTempFilePath}]')
-                    fullRead = open(fullTempFilePath, errors='strict')
-                else:
-                    fullRead = open(fileFullPath, errors='strict')
-                data = fullRead.read()
+        # Replace each of the urls found
+        if firebase_urls_found:
+            fh_input.seek(0)  # rewind to the beginning of the file
+            file_contents = fh_input.read()
+            fh_input.seek(0)
+            fh_input.truncate() 
+            for firebase_url in firebase_urls_found:
                 # Replace the firebase url with the local file path
-                data = data.replace(firebaseUrl, newFilePath)
-
-                print(f'writing to [{fullTempFilePath}]')
-                with open(fullTempFilePath,'wt') as temp_file:
-                    temp_file.write(data)
-                    image_file_number += 1
-                if os.path.exists(fullTempFilePath):
-                    print(f'rename file from:\n [{fullTempFilePath}] to:\n [{fileFullPath}]')
-                    os.replace(src=fullTempFilePath, dst=fileFullPath)
-                fullRead.close()
-        filehandle.close()
+                local_path = firebase2local[firebase_url]
+                file_contents = file_contents.replace(firebase_url, local_path)
+            fh_input.write(file_contents)
+        fh_input.close()
