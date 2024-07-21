@@ -4,27 +4,23 @@
 # e.g.,
 #   python downloadfirebase.py .
 # Opens files in directory, outputs firebase URLs to a file, downloads them, and replaces the links with a link to the new files.
-# Files are This automatically puts filenames in /assets - change the newFilePath variable if you want to change this
+# The downloaded files are saved in ".../images"
 
-import re
-import os
-import requests
 import calendar
 import hashlib
+from io import BytesIO
+import os
+import re
 import shutil
 import sys
 import time
 import traceback
-from io import BytesIO
 
-inputDir = '/Users/nic/Desktop/test2021'
+import requests
+
 inputDir = sys.argv[1]
 print(f'inputDir = [{inputDir}]')
-# NOTE: need to ignore .git directory!
-# Maybe just look for *.md files
-# sys.exit()
 
-firebaseShort = 'none'
 fullRead = 'none'
 fileFullPath = ''
 fullTempFilePath = ''
@@ -34,10 +30,11 @@ IMAGES_DIR_FULL = f'{inputDir}/{IMAGES_DIR_RELATIVE}'  # images, pdfs, etc
 file_number_markdown = 0
 image_file_number = 1
 url2filename = {}  # key: url; value: hexdigest.ext;  e.g., url2checksum['https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Frob_graph_1_2021-03-05%2FFUVL4EDjUx.pdf'] = '0cc175b9c0f1b6a831c399e269772661.pdf'
+firebase2local = {}  # key: firebase url; value: local path;   e.g., firebase2local['https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Frob_graph_1_2021-03-05%2FFUVL4EDjUx.pdf'] = 'images/0cc175b9c0f1b6a831c399e269772661.pdf'
 if not os.path.exists(IMAGES_DIR_FULL):
     os.makedirs(IMAGES_DIR_FULL)
 
-# Walk through all files in all directories within the specified vault directory
+# Walk through all files in all directories in inputDir
 for dirpath, dirnames, filenames in os.walk(inputDir):
     # ignore the IMAGES_DIR_RELATIVE directory
     if dirpath == IMAGES_DIR_FULL:
@@ -86,14 +83,14 @@ for dirpath, dirnames, filenames in os.walk(inputDir):
                     if url2filename.get(firebaseUrl) and (url2filename.get(firebaseUrl) != md5_filename):
                         print(f'ERROR:  firebaseUrl=[{firebaseUrl}] existing digest = [{url2filename[filebaseUrl]}]  new digest = [{md5_filename}]')
                         sys.exit(1)
-                    # Create new local file out of downloaded firebase file
-                    newFilePath = f'{IMAGES_DIR_RELATIVE}/{md5_filename}'
 
+                    newFilePath = f'{IMAGES_DIR_RELATIVE}/{md5_filename}'  # e.g., images/0cc175b9c0f1b6a831c399e269772661.pdf
                     output_path = f'{inputDir}/{newFilePath}'
                     if os.path.exists(output_path):
                         print(f'NOTE: already downloaded: [{firebaseUrl}]  [{output_path}]')
                     else:
                         url2filename[firebaseUrl] = md5_filename
+                        firebase2local[firebaseUrl] = newFilePath
                         # Download the file
                         print(f'requests.get({firebaseUrl})')
                         request = requests.get(firebaseUrl)
