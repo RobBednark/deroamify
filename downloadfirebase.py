@@ -38,6 +38,11 @@ if not os.path.exists(IMAGES_DIR_FULL):
 
 # Walk through all files in all directories within the specified vault directory
 for dirpath, dirnames, filenames in os.walk(inputDir):
+    # ignore the IMAGES_DIR_RELATIVE directory
+    if dirpath == IMAGES_DIR_FULL:
+        print(f'skipping: dirpath=[{dirpath}]')
+        continue
+
     for filename in filenames:
         file_number += 1
         fileFullPath = os.path.join(dirpath,filename)
@@ -45,17 +50,31 @@ for dirpath, dirnames, filenames in os.walk(inputDir):
         filehandle = open(fileFullPath, errors='strict')
         for line in filehandle:
             # Download the Firebase file and save it in the images directory
-            if 'https://firebasestorage' in line:
+            #if 'https://firebasestorage' in line:
+            if 'firebasestorage' in line:
                 try:
                     # If it's a PDF, it will be in the format {{pdf: link}}
                     if '{{pdf:' in line:
-                        link = re.search(r'https://firebasestorage(.*)\?alt(.*)\}', line)
+                        match = re.search(r'https://firebasestorage(.*)\?alt(.*)\}', line)
                     else:
-                        link = re.search(r'https://firebasestorage(.*)\?alt(.*)\)', line)
-                    # https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2FDownloadMyBrain%2FLy4Wel-rjk.png
-                    firebaseShort = 'https://firebasestorage' + link.group(1)
-                    # https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2FDownloadMyBrain%2FLy4Wel-rjk.png?alt=media&token=0fbafc8f-0a47-4720-9e68-88f70803ced6
-                    firebaseUrl = link.group(0)[:-1]
+                        match = re.search(r'https://firebasestorage(.*)\?alt(.*)\)', line)
+                    # e.g., input line:
+                    #   - {{[[pdf]]: https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Frob_graph_1_2021-03-05%2FFUVL4EDjUx.pdf?alt=media&token=89430094-7f61-4cbf-8799-b298359f3469}}
+                    #                                       ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                    #                                       group(1)                                                                                                    group(2)
+
+                    # e.g., match.group(0):
+                    #   .googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Frob_graph_1_2021-03-05%2FFUVL4EDjUx.pdf
+                    # e.g., firebaseUrl:
+                    #   .googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Frob_graph_1_2021-03-05%2FFUVL4EDjUx.pdf (strip final character, presumably the newline)
+                    firebaseUrl = match.group(0)[:-1]
+
+                    # e.g., match.group(1):
+                    #   =media&token=89430094-7f61-4cbf-8799-b298359f3469}}
+                    # e.g., firebaseShort:
+                    #   https://firebasestorage=media&token=89430094-7f61-4cbf-8799-b298359f3469}}
+                    
+                    firebaseShort = 'https://firebasestorage' + match.group(1)
 
                     # Download the file
                     print(f'requests.get({firebaseUrl})')
@@ -77,7 +96,8 @@ for dirpath, dirnames, filenames in os.walk(inputDir):
                     print(f'ERROR:  AttributeError: line=[{line}] fileFullPath=[{fileFullPath}]')
                     # Print all the details of the exception
                     print(traceback.format_exc())
-                    sys.exit(1)
+                    # sys.exit(1)
+                    continue
                 # Save Markdown file with new local file link as a temp file
                 # If there is already a temp version of a file, open that.
                 fullTempFilePath = inputDir + '/temp_' + filename
