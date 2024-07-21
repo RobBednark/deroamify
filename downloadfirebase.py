@@ -43,7 +43,7 @@ for dirpath, dirnames, filenames in os.walk(inputDir):
     if dirpath == IMAGES_DIR_FULL:
         print(f'skipping: dirpath=[{dirpath}]')
         continue
-    if dirpath == './.obsidian':
+    if dirpath.startswith('./.obsidian'):
         print(f'skipping: dirpath=[{dirpath}]')
         continue
 
@@ -57,12 +57,7 @@ for dirpath, dirnames, filenames in os.walk(inputDir):
             #if 'https://firebasestorage' in line:
             if 'firebasestorage' in line:
                 try:
-                    # If it's a PDF, it will be in the format {{pdf: link}}
-                    if '{{pdf:' in line:
-                        match = re.search(r'https://firebasestorage(.*)\?alt(.*)\}', line)
-                    else:
-                        match = re.search(r'https://firebasestorage(.*)\?alt(.*)\)', line)
-                    # match = re.search(r'https://firebasestorage(.*)\?alt(.*)[\)\}]', line)  # non-greedy, ending with ) or }
+                    match = re.search(r'https://firebasestorage(.*)\?alt(.*?)[\)\}]', line)  # ".*?" is non-greedy -- stop at the first ) or }.
                     if not match:
                         print(f'ERROR: no match found for line=[{line}] \n   fileFullPath=[{fileFullPath}]')
                     # e.g., input line:
@@ -74,8 +69,6 @@ for dirpath, dirnames, filenames in os.walk(inputDir):
 
                     # e.g., match.group(0) (entire match):
                     #   https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Frob_graph_1_2021-03-05%2FFUVL4EDjUx.pdf?alt=media&token=89430094-7f61-4cbf-8799-b298359f3469}}
-                    final_char = match.group(0)[-1]
-                    print(f'final_char=[{final_char}]')
                     firebaseUrl = match.group(0)[:-1]  # group(0) is the entire match; strip the final character, a ')' or '}'
 
                     # e.g., match.group(1):
