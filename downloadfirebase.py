@@ -6,15 +6,12 @@
 # Opens files in directory, outputs firebase URLs to a file, downloads them, and replaces the links with a link to the new files.
 # The downloaded files are saved in ".../images"
 
-import calendar
 import hashlib
 from io import BytesIO
 import os
 import re
 import shutil
 import sys
-import time
-import traceback
 
 import requests
 
@@ -81,7 +78,7 @@ for dirpath, dirnames, filenames in os.walk(inputDir):
                 md5_filename = hashlib.md5(firebaseUrl.encode('utf-8')).hexdigest()
                 md5_filename += file_extension
                 if url2filename.get(firebaseUrl) and (url2filename.get(firebaseUrl) != md5_filename):
-                    print(f'ERROR:  firebaseUrl=[{firebaseUrl}] existing digest = [{url2filename[filebaseUrl]}]  new digest = [{md5_filename}]')
+                    print(f'ERROR:  firebaseUrl=[{firebaseUrl}] existing digest = [{url2filename[firebaseUrl]}]  new digest = [{md5_filename}]')
                     sys.exit(1)
 
                 newFilePath = f'{IMAGES_DIR_RELATIVE}/{md5_filename}'  # e.g., images/0cc175b9c0f1b6a831c399e269772661.pdf
