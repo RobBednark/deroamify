@@ -42,6 +42,8 @@ for dirpath, dirnames, filenames in os.walk(inputDir):
         continue
 
     for filename in filenames:
+        if filename == '.DS_Store':
+            continue
         file_number_markdown += 1
         fileFullPath = os.path.join(dirpath,filename)
         print(f'markdown file [{file_number_markdown}]: [{fileFullPath}]')
@@ -51,6 +53,7 @@ for dirpath, dirnames, filenames in os.walk(inputDir):
             # Download the Firebase file and save it in the images directory
             #if 'https://firebasestorage' in line:
             if 'firebasestorage' in line:
+                print(f'MATCHING LINE: {line.strip()}')
                 match = re.search(r'https://firebasestorage(.*)\?alt(.*?)[\)\}]', line)  # ".*?" is non-greedy -- stop at the first ) or }.
                 if not match:
                     print(f'ERROR: no match found for line=[{line}] \n   fileFullPath=[{fileFullPath}]')
@@ -95,6 +98,11 @@ for dirpath, dirnames, filenames in os.walk(inputDir):
                     print(f'writing [{output_path}]')
                     with open(output_path, 'wb') as fh_output:
                         shutil.copyfileobj(BytesIO(request.content), fh_output)
+        # Change these:
+        # MATCHING LINE: - {{[[pdf]]: https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Frob_graph_1_2021-03-05%2FFUVL4EDjUx.pdf?alt=media&token=89430094-7f61-4cbf-8799-b298359f3469}}
+        # MATCHING LINE: - {{pdf: https://firebasestorage.googleapis.com/v0/b/firescript-577a2.appspot.com/o/imgs%2Fapp%2Frob_graph_1_2021-03-05%2FVkZXu_7_R0.pdf?alt=media&token=0b708296-4841-477f-90fe-730686340de1}}
+        # to these:
+        #         - ![](images/0e30eba0e7d81de153d2b4e712a2a056.png)
         # Replace each of the urls found
         if firebase_urls_found:
             fh_input.seek(0)  # rewind to the beginning of the file
@@ -106,4 +114,5 @@ for dirpath, dirnames, filenames in os.walk(inputDir):
                 local_path = firebase2local[firebase_url]
                 file_contents = file_contents.replace(firebase_url, local_path)
             fh_input.write(file_contents)
+            print(f'UPDATED [{len(firebase_urls_found)}]: {fileFullPath}')
         fh_input.close()
